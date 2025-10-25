@@ -1,6 +1,6 @@
 import { getCurrentUser } from '@/lib/session';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { LogoutButton } from '@/components/auth/logout-button';
 
 export default async function ClientDashboard() {
   const user = await getCurrentUser();
@@ -13,9 +13,7 @@ export default async function ClientDashboard() {
             <h1 className="text-3xl font-bold">Welcome back, {user?.fullName}!</h1>
             <p className="text-muted-foreground">Here's your tax preparation status</p>
           </div>
-          <Button variant="outline" onClick={() => (window.location.href = '/api/auth/logout')}>
-            Logout
-          </Button>
+          <LogoutButton />
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

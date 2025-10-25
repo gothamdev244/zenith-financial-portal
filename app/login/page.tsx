@@ -1,13 +1,16 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
   const error = searchParams?.get('error');
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = (provider?: string) => {
     const url = provider
@@ -15,6 +18,35 @@ export default function LoginPage() {
       : '/api/auth/login';
     window.location.href = url;
   };
+
+  const handleDevLogin = async (email: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/auth/dev-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        window.location.href = data.redirectUrl;
+      } else {
+        alert(data.error || 'Login failed');
+        setLoading(false);
+      }
+    } catch (err) {
+      alert('Login failed');
+      setLoading(false);
+    }
+  };
+
+  const testUsers = [
+    { email: 'admin@zenithfinancial.com', name: 'Admin User', role: 'admin' },
+    { email: 'john.advisor@zenithfinancial.com', name: 'John Smith', role: 'advisor' },
+    { email: 'michael.client@email.com', name: 'Michael Chen', role: 'client' },
+  ];
 
   const getErrorMessage = (errorCode: string | null) => {
     switch (errorCode) {
@@ -123,10 +155,59 @@ export default function LoginPage() {
             <span className="font-semibold">WorkOS</span>
           </p>
 
+          {process.env.NODE_ENV === 'development' && (
+            <>
+              <Separator className="my-6" />
+
+              <div className="space-y-3">
+                <div className="text-center">
+                  <p className="text-sm font-semibold text-orange-600 dark:text-orange-400">
+                    🚀 Development Mode
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Quick login without WorkOS setup
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  {testUsers.map((user) => (
+                    <Button
+                      key={user.email}
+                      onClick={() => handleDevLogin(user.email)}
+                      variant="secondary"
+                      className="w-full justify-start"
+                      disabled={loading}
+                    >
+                      <div className="flex items-center gap-3 w-full">
+                        <div className={`w-2 h-2 rounded-full ${
+                          user.role === 'admin' ? 'bg-red-500' :
+                          user.role === 'advisor' ? 'bg-blue-500' :
+                          'bg-green-500'
+                        }`} />
+                        <div className="flex-1 text-left">
+                          <div className="font-medium text-sm">{user.name}</div>
+                          <div className="text-xs text-muted-foreground capitalize">
+                            {user.role}
+                          </div>
+                        </div>
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+
+                <p className="text-xs text-center text-muted-foreground">
+                  Click any user to instantly log in
+                </p>
+              </div>
+            </>
+          )}
+
           <p className="text-center text-xs text-muted-foreground mt-4">
-            For demo purposes, use any email from the test database.
-            <br />
-            Contact your administrator for access.
+            {process.env.NODE_ENV === 'production' ? (
+              'Contact your administrator for access.'
+            ) : (
+              'Development mode: Use test users above or configure WorkOS for production auth.'
+            )}
           </p>
         </CardContent>
       </Card>

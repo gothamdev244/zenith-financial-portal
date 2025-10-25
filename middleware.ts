@@ -14,7 +14,7 @@ const sessionOptions = {
 };
 
 // Routes that don't require authentication
-const publicRoutes = ['/', '/login', '/api/auth/login', '/api/auth/callback'];
+const publicRoutes = ['/', '/login', '/api/auth/login', '/api/auth/callback', '/api/auth/dev-login'];
 
 // Role-based route protection
 const roleRoutes = {
